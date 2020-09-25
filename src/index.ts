@@ -26,6 +26,8 @@ const stateMessages = [
 ]
 
 
+const usersState = new Map()
+
 app.get('/', (req, res) => {
 	res.send('server is currently running')
 })
@@ -33,10 +35,30 @@ app.get('/', (req, res) => {
 socketBus.on('connection', (connection) => {
 
 
+	usersState.set(connection, {userId: 'userID_' + new Date().getTime().toString(), name: 'anonymus'})
+
+	socketBus.on('disconnect', () => {
+		usersState.delete(connection)
+	})
+
+	connection.on('set-client-name', (name: string) => {
+		const user = usersState.get(connection)
+		user.userName = name
+	})
+
+
 	connection.on('client-message-sent', (message: string) => {
 		console.log(message)
+
+		if (typeof message !== 'string' || message === ''){
+			console.log('typeof message !== \'string\' || message === \'\'')
+			return
+		}
+
+		const user = usersState.get(connection)
+
 		let clientMessage = {
-			userId: 'userID_' + new Date().getTime(), userName: 'New Message of Client:', userMessage: {
+			userId: user.userId, userName: user.userName, userMessage: {
 				id: 'messID_' + new Date().getTime(), text: message
 			}
 		}
@@ -53,8 +75,10 @@ socketBus.on('connection', (connection) => {
 	console.log('USER CONNECTED')
 })
 
-const PORT = process.env.PORT || 3003
 
+
+
+const PORT = process.env.PORT || 3003
 server.listen(PORT, () => {
 	console.log('listening on *:3003')
 })
