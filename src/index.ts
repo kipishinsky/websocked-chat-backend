@@ -7,13 +7,15 @@ const server = http.createServer(app)
 const io = socketio(server)
 
 app.get('/', (req, res) => {
-	res.send('server is currently running');
-});
+	res.send('server is currently running')
+})
 
 io.on('connection', (socket) => {
-	console.log('a user connected');
-});
+	console.log('a user connected')
+})
 
-server.listen(3003, () => {
-	console.log('listening on *:3003');
-});
+const PORT = process.env.PORT || 3003
+
+server.listen(PORT, () => {
+	console.log('listening on *:3003')
+})
