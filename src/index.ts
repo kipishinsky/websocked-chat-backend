@@ -9,18 +9,18 @@ const socketBus = io(server)
 
 const stateMessages = [
 	{
-		userId: 'hdg2231', userName: 'Anton', userMessage: {
-			id: '6f3fyh', text: 'privet brodyga'
+		userId: 'userID_1', userName: 'Anton:', userMessage: {
+			id: 'messID_1', text: 'privet brodyga'
 		}
 	},
 	{
-		userId: 'hdg213211', userName: 'Igor', userMessage: {
-			id: '6f3fyh', text: 'privet anton'
+		userId: 'userID_2', userName: 'Igor:', userMessage: {
+			id: 'messID_2', text: 'privet anton'
 		}
 	},
 	{
-		userId: 'hdgddf211', userName: 'Sveta', userMessage: {
-			id: '6f32fsh', text: 'privet vsem!!!!!!'
+		userId: 'userID_3', userName: 'Sveta:', userMessage: {
+			id: 'messID_3', text: 'privet vsem!!!!!!'
 		}
 	}
 ]
@@ -32,9 +32,20 @@ app.get('/', (req, res) => {
 
 socketBus.on('connection', (connection) => {
 
+
 	connection.on('client-message-sent', (message: string) => {
 		console.log(message)
+		let clientMessage = {
+			userId: 'userID_' + new Date().getTime(), userName: 'New Message of Client:', userMessage: {
+				id: 'messID_' + new Date().getTime(), text: message
+			}
+		}
+		stateMessages.push(clientMessage)
+
+		socketBus.emit('new-client-message-sent', clientMessage)
 	})
+
+
 
 	connection.emit('init-messages-published', stateMessages)
 
