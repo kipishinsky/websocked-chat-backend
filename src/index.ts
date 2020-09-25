@@ -34,16 +34,24 @@ app.get('/', (req, res) => {
 
 socketBus.on('connection', (connection) => {
 
-
-	usersState.set(connection, {userId: 'userID_' + new Date().getTime().toString(), name: 'anonymus'})
+	usersState.set(connection, {userId: 'userID_' + new Date().getTime().toString(), userName: 'anonymus'})
 
 	socketBus.on('disconnect', () => {
 		usersState.delete(connection)
 	})
 
 	connection.on('set-client-name', (name: string) => {
+
+		if (typeof name !== 'string') {
+			return
+		}
+
 		const user = usersState.get(connection)
 		user.userName = name
+	})
+
+	connection.on('client-typing', () => {
+		connection.broadcast.emit('user-typing-message', usersState.get(connection))
 	})
 
 
