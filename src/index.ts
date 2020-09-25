@@ -55,11 +55,12 @@ socketBus.on('connection', (connection) => {
 	})
 
 
-	connection.on('client-message-sent', (message: string) => {
+	connection.on('client-message-sent', (message: string, successFn) => {
 		console.log(message)
 
-		if (typeof message !== 'string' || message === ''){
+		if (typeof message !== 'string' || message === '' || message.length > 20){
 			console.log('typeof message !== \'string\' || message === \'\'')
+			successFn('Message length should be less than 20 chars')
 			return
 		}
 
@@ -73,17 +74,17 @@ socketBus.on('connection', (connection) => {
 		stateMessages.push(clientMessage)
 
 		socketBus.emit('new-client-message-sent', clientMessage)
+
+		successFn(null)
 	})
 
 
-
-	connection.emit('init-messages-published', stateMessages)
-
+	connection.emit('init-messages-published', stateMessages, () => {
+		console.log('init messages received')
+	})
 
 	console.log('USER CONNECTED')
 })
-
-
 
 
 const PORT = process.env.PORT || 3003
